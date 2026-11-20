@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>루닉필름 실무</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 촬영장 실무 도구 — 짧고 단정하게, 한 손으로 쓰는 앱
+   IDEA: 카메라 모니터의 노출 오버레이 — 큰 숫자, 탈리 램프 같은 경고
+   PICTURE: 측정 결과 판독창(ISO·조리개·셔터·ND)이 첫 화면의 주인공
+   COLOUR and TYPE: 그래파이트/스톤 바탕, 탈리 레드 경고, 청록 OK · IBM Plex Sans KR
+   LAYOUT: 한 열, 하단 탭바, 카드 대신 선으로 나눈 판넬 */
+:root{color-scheme:light dark;
+--bg:light-dark(#ecebe7,#101214);--panel:light-dark(#fff,#191c1f);--ink:light-dark(#15171a,#eef0f1);
+--mute:light-dark(#5c6166,#9aa1a7);--line:light-dark(#d8d5cf,#2a2e33);--acc:#e0402e;
+--ok:light-dark(#0f7d6b,#4cc5ab);--soft:light-dark(#f5f4f1,#22262a);--warn:light-dark(#a3530a,#eda05a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans KR",system-ui,sans-serif;overflow-x:clip;
+padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(84px + env(safe-area-inset-bottom)) env(safe-area-inset-left)}
+main{max-width:720px;margin:0 auto;padding:16px 16px 24px}
+h1{font-size:32px;line-height:1.05;margin:8px 0 4px;text-wrap:balance}
+h2{font-size:20px;margin:28px 0 10px}
+h3{font-size:16px;margin:18px 0 6px}
+p{margin:6px 0}.mute{color:var(--mute);font-size:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lbl{font-size:13px;color:var(--mute);margin:12px 0 6px}
+.chip{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;padding:0 14px;min-height:40px;font:inherit;font-size:15px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;border:0;border-radius:14px;background:var(--acc);color:#fff;font:600 17px/1 inherit;font-family:inherit;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);min-height:44px;font-size:15px;font-weight:400}
+.btn.sm{width:auto;min-height:40px;padding:0 14px;font-size:14px}
+input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
+input[type=text],input[type=number],select{font:inherit;font-size:16px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:44px;width:100%}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.read{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.read div{padding:14px 10px;border-right:1px solid var(--line)}.read div:last-child{border-right:0}
+.read small{display:block;font-size:13px;color:var(--mute)}
+.read b{display:block;font-size:clamp(24px,7vw,38px);line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.read .hot{background:var(--acc);color:#fff}.read .hot small{color:#ffe1dc}
+.tally{display:flex;gap:10px;align-items:center;font-weight:600;padding:12px 14px;border-radius:12px;margin-top:10px}
+.tally.nd{background:var(--acc);color:#fff}.tally.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.tally.dark{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.lamp{width:12px;height:12px;border-radius:50%;background:currentColor;flex:none}
+.scale{position:relative;height:30px;margin:14px 0 4px;border-radius:8px;background:linear-gradient(90deg,#1d2226,#6a6f73 50%,#f2f2ef)}
+.scale i{position:absolute;top:-4px;bottom:-4px;width:4px;border-radius:2px;background:var(--acc);transform:translateX(-2px)}
+.scale span{position:absolute;bottom:-20px;font-size:12px;color:var(--mute);transform:translateX(-50%)}
+.kel{font-size:clamp(34px,10vw,52px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.notes{margin:10px 0 0;padding-left:18px;font-size:15px}
+ul.list{list-style:none;margin:0;padding:0}
+ul.list li{display:flex;gap:12px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--line);min-height:52px;cursor:pointer}
+ul.list li:last-child{border-bottom:0}
+.box{width:26px;height:26px;border:2px solid var(--line);border-radius:7px;flex:none;display:grid;place-items:center}
+li.on .box{background:var(--ok);border-color:var(--ok)}li.on .box::after{content:"";width:7px;height:13px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-2px)}
+li.on .t{color:var(--mute);text-decoration:line-through}
+.grp{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 4px}
+.grp h3{margin:0}.cnt{font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:8px 0 2px}.bar i{display:block;height:100%;background:var(--ok)}
+.ed{display:flex;gap:8px;margin:6px 0}.ed input{flex:1}
+.x{flex:none;width:44px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--mute);font-size:20px;cursor:pointer}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+details{border-top:1px solid var(--line);padding:4px 0}summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:600}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:62px;color:var(--mute);text-decoration:none;font-size:13px}
+nav a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+nav a[aria-current=page]{color:var(--ink);font-weight:600}nav a[aria-current=page] svg{stroke:var(--acc)}
+.sync{font-size:12px;color:var(--mute)}
+.steps{padding-left:20px;margin:6px 0 12px}.steps li{margin:4px 0}
+.vwrap{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:4/3;margin:12px 0}
+.vwrap video{width:100%;height:100%;object-fit:cover;display:block}
+.vwrap .spot{position:absolute;left:30%;top:30%;width:40%;height:40%;border:2px solid #fff;border-radius:6px;box-shadow:0 0 0 1px rgba(0,0,0,.45)}
+.vwrap.full .spot{display:none}
+.vwrap .live{position:absolute;left:10px;top:10px;background:var(--acc);color:#fff;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px}
+@media(max-width:420px){.read{grid-template-columns:repeat(2,minmax(0,1fr))}.read div:nth-child(2){border-right:0}.read div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media(prefers-reduced-motion:no-preference){.scale i{transition:left .4s ease}}
+</style>
+</head>
+<body>
+<main id="view"></main>
+<nav id="tabs">
+<a href="#check" data-t="check"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8 12 3 3 5-6"/></svg>체크리스트</a>
+<a href="#interview" data-t="interview"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>인터뷰</a>
+<a href="#setup" data-t="setup"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>설정</a>
+</nav>
+<script>
+{
+const uid=()=>Math.random().toString(36).slice(2,9);
+const L=a=>a.map(t=>({id:uid(),t}));
+const IVC=[['groom','식전 · 신랑'],['bride','식전 · 신부'],['both','식전 · 신랑신부 공통'],['guest','식전 · 하객'],['parents','식전 · 혼주'],['after','식후']];
+const DEF=()=>({v:1,
+ set:{ivc:IVC.map(([id,name])=>({id,name})),
+  iv:{groom:L(['지금 기분이 어떠세요?','신부를 처음 만났을 때 첫인상은?','신부에게 하고 싶은 한마디']),
+   bride:L(['오늘 아침 준비하면서 어떤 생각이 들었어요?','신랑의 어떤 점에 반했어요?','신랑에게 하고 싶은 한마디']),
+   both:L(['두 분은 어떻게 만나셨어요?','프러포즈는 어땠어요?','10년 뒤의 서로에게']),
+   guest:L(['신랑·신부와 어떤 사이세요?','두 사람에게 축하 한마디']),
+   parents:L(['자녀를 보내는 지금 마음은?','사위·며느리에게 한마디']),
+   after:L(['식을 마친 소감','가장 기억에 남는 순간','와주신 분들께 인사'])},
+  ck:{common:L(['배터리 완충 (바디·예비)','메모리카드 포맷','S-Log3 / S-Gamut3.Cine 확인','10bit 4:2:2 · 프레임레이트 확인','셔터 180° (프레임레이트 ×2)','센서·렌즈·ND 청소','무선마이크 충전·페어링','바디 간 시계 동기화','타임테이블·계약 내용 확인']),
+   types:[{id:'t1',name:'본식',items:L(['예식장 동선·조명 사전 확인','혼주 인터뷰 시간 조율','입장·반지 교환 촬영 위치 확인'])},
+    {id:'t2',name:'야외 촬영',items:L(['일몰 시간 확인','우천 플랜','이동 동선·주차'])},
+    {id:'t3',name:'식전 영상',items:L(['질문지 미리 공유','소품 준비'])}]}},
+ cur:{type:'t1',title:'',done:{},asked:{},extra:[]}});
+const KEY='lunic-work-v1';
+const merge=o=>{const d=DEF();if(!o||!o.set)return d;return{v:1,set:Object.assign(d.set,o.set),cur:Object.assign(d.cur,o.cur||{})}};
+let S;try{S=merge(JSON.parse(localStorage.getItem(KEY)))}catch(e){S=DEF()}
+let dref=null,synced=false,writing=false,pending=false,tmr=0;
+const flush=async()=>{if(!dref)return;if(writing){pending=true;return}writing=true;
+ try{await dref.set({json:JSON.stringify(S),at:Date.now()})}catch(e){}writing=false;if(pending){pending=false;flush()}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}clearTimeout(tmr);tmr=setTimeout(flush,900)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const chip=(act,val,on,txt)=>`<button class="chip" data-act="${act}" data-v="${esc(val)}" aria-pressed="${on}">${txt}</button>`;
+function vCheck(){const ty=S.set.ck.types.find(t=>t.id===S.cur.type)||S.set.ck.types[0];
+ const groups=[['공통',S.set.ck.common,'common'],[ty?ty.name:'촬영 종류',ty?ty.items:[],'type'],['이번 촬영만',S.cur.extra,'extra']];
+ const all=groups.flatMap(g=>g[1]),done=all.filter(i=>S.cur.done[i.id]).length;
+ let h=`<h1>촬영 전 체크리스트</h1><input type="text" id="title" placeholder="촬영 이름 (예: 11/22 김○○ 본식)" value="${esc(S.cur.title)}" style="margin:8px 0">
+ <div class="row">${S.set.ck.types.map(t=>chip('type',t.id,ty&&t.id===ty.id,esc(t.name))).join('')}</div>
+ <div class="bar"><i style="width:${all.length?done/all.length*100:0}%"></i></div><p class="cnt">${done} / ${all.length} 완료</p>`;
+ for(const[n,items,k]of groups){const d=items.filter(i=>S.cur.done[i.id]).length;
+  h+=`<div class="grp"><h3>${esc(n)}</h3><span class="cnt">${d}/${items.length}</span></div><div class="panel" style="padding:4px 14px;margin-top:6px">`;
+  h+=items.length?`<ul class="list">${items.map(i=>`<li data-act="tick" data-v="${i.id}" class="${S.cur.done[i.id]?'on':''}" role="checkbox" aria-checked="${!!S.cur.done[i.id]}" tabindex="0"><span class="box"></span><span class="t" style="flex:1">${esc(i.t)}</span>${k==='extra'?`<button class="x" data-act="delextra" data-v="${i.id}" aria-label="삭제">×</button>`:''}</li>`).join('')}</ul>`:`<p class="mute" style="padding:10px 0">항목이 없어요.</p>`;
+  if(k==='extra')h+=`<form class="ed" data-form="extra" style="padding-bottom:10px"><input type="text" name="t" placeholder="이번 촬영만 챙길 것 추가"><button class="btn sm">추가</button></form>`;
+  h+=`</div>`}
+ h+=`<button class="btn ghost" data-act="resetcheck" style="margin-top:14px">새 촬영 시작 (체크·이번 촬영 항목 비우기)</button><p class="mute" style="margin-top:8px">공통·종류별 항목은 설정에서 바꿔요.</p>`;return h}
+function vIv(){const cats=S.set.ivc,all=cats.flatMap(c=>S.set.iv[c.id]||[]),done=all.filter(q=>S.cur.asked[q.id]).length;
+ let h=`<h1>인터뷰 목록</h1><p class="mute">물어본 질문을 탭해서 표시하세요.</p><div class="bar"><i style="width:${all.length?done/all.length*100:0}%"></i></div><p class="cnt">${done} / ${all.length}</p>`;
+ for(const{id:k,name:n}of cats){const qs=S.set.iv[k]||[],d=qs.filter(q=>S.cur.asked[q.id]).length;
+  h+=`<div class="grp"><h3>${esc(n)}</h3><span class="cnt">${d}/${qs.length}</span></div><div class="panel" style="padding:4px 14px;margin-top:6px">`+
+  (qs.length?`<ul class="list">${qs.map(q=>`<li data-act="ask" data-v="${q.id}" class="${S.cur.asked[q.id]?'on':''}" role="checkbox" aria-checked="${!!S.cur.asked[q.id]}" tabindex="0"><span class="box"></span><span class="t">${esc(q.t)}</span></li>`).join('')}</ul>`:`<p class="mute" style="padding:10px 0">설정에서 질문을 추가하세요.</p>`)+`</div>`}
+ h+=`<button class="btn ghost" data-act="resetiv" style="margin-top:14px">표시 모두 지우기</button>`;return h}
+const ed=(key,items,ph)=>`${items.map(i=>`<div class="ed"><input type="text" data-edit="${key}" data-id="${i.id}" value="${esc(i.t)}" aria-label="항목"><button class="x" data-act="del" data-k="${key}" data-v="${i.id}" aria-label="삭제">×</button></div>`).join('')}
+ <form class="ed" data-form="add" data-k="${key}"><input type="text" name="t" placeholder="${ph}"><button class="btn sm">추가</button></form>`;
+function vSet(){const s=S.set;let h=`<h1>설정</h1><p class="sync">${synced?'기기 간 동기화돼요':'이 기기 브라우저에만 저장돼요'}</p>`;
+ h+=`<h2>인터뷰 질문</h2><div class="panel">${s.ivc.map(c=>`<details><summary>${esc(c.name)} (${(s.iv[c.id]||[]).length})</summary><div class="ed"><input type="text" data-ivname="${c.id}" value="${esc(c.name)}" aria-label="타이틀 이름"><button class="x" data-act="delcat" data-v="${c.id}" aria-label="타이틀 삭제">×</button></div><p class="mute">질문</p>${ed('iv:'+c.id,s.iv[c.id]||[],'질문 추가')}</details>`).join('')}
+ <form class="ed" data-form="ivcat" style="margin-top:10px"><input type="text" name="t" placeholder="타이틀 추가 (예: 식후 · 친구)"><button class="btn sm">추가</button></form></div>`;
+ h+=`<h2>체크리스트 항목</h2><div class="panel"><details><summary>공통 (${s.ck.common.length})</summary>${ed('ck:common',s.ck.common,'공통 항목 추가')}</details>
+ ${s.ck.types.map(t=>`<details><summary>${esc(t.name)} (${t.items.length})</summary><div class="ed"><input type="text" data-tyname="${t.id}" value="${esc(t.name)}" aria-label="종류 이름"><button class="x" data-act="deltype" data-v="${t.id}" aria-label="종류 삭제">×</button></div><p class="mute">항목</p>${ed('ty:'+t.id,t.items,'항목 추가')}</details>`).join('')}
+ <form class="ed" data-form="type" style="margin-top:10px"><input type="text" name="t" placeholder="촬영 종류 추가 (예: 돌잔치)"><button class="btn sm">추가</button></form></div>
+ <p class="mute" style="margin-top:16px">처음 들어있는 질문과 항목은 예시예요. 자유롭게 바꿔 쓰세요.</p>`;return h}
+
+const V={check:vCheck,interview:vIv,setup:vSet};
+const tab=()=>{const t=location.hash.slice(1);return V[t]?t:'check'};
+function render(){const t=tab(),y=window.scrollY;document.getElementById('view').innerHTML=V[t]();
+ document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.dataset.t===t?'page':'false'));window.scrollTo(0,y)}
+const list=k=>{const[a,b]=k.split(':');if(a==='iv')return S.set.iv[b]||(S.set.iv[b]=[]);if(a==='ck')return S.set.ck.common;const t=S.set.ck.types.find(x=>x.id===b);return t?t.items:[]};
+const upd=()=>{save();render()};
+
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,v=el.dataset.v,c=S.cur;
+ if(el.tagName==='BUTTON'&&el.form)e.preventDefault();
+ if(a==='type')c.type=v;
+ else if(a==='tick'){if(e.target.closest('.x'))return;c.done[v]=!c.done[v]}else if(a==='ask')c.asked[v]=!c.asked[v];
+ else if(a==='delextra'){e.stopPropagation();c.extra=c.extra.filter(i=>i.id!==v)}
+ else if(a==='resetcheck'){c.done={};c.extra=[];c.title=''}else if(a==='resetiv')c.asked={};
+ else if(a==='del'){const L2=list(el.dataset.k),i=L2.findIndex(x=>x.id===v);if(i>-1)L2.splice(i,1)}
+ else if(a==='delcat'){if(S.set.ivc.length<2)return;S.set.ivc=S.set.ivc.filter(x=>x.id!==v);delete S.set.iv[v]}
+ else if(a==='deltype'){if(S.set.ck.types.length<2)return;S.set.ck.types=S.set.ck.types.filter(t=>t.id!==v);if(c.type===v)c.type=S.set.ck.types[0].id}
+ else return;upd()});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('li[data-act]')){e.preventDefault();e.target.click()}});
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target,inp=f.querySelector('[name=t]'),t=(inp&&inp.value||'').trim();if(!t)return;
+ if(f.dataset.form==='add')list(f.dataset.k).push({id:uid(),t});else if(f.dataset.form==='extra')S.cur.extra.push({id:uid(),t});
+ else if(f.dataset.form==='ivcat'){const id='c'+uid();S.set.ivc.push({id,name:t});S.set.iv[id]=[]}
+ else if(f.dataset.form==='type'){const id='t'+uid();S.set.ck.types.push({id,name:t,items:[]})}upd()});
+document.addEventListener('change',e=>{const el=e.target;
+ if(el.dataset.edit){const it=list(el.dataset.edit).find(x=>x.id===el.dataset.id);if(it&&el.value.trim())it.t=el.value.trim();save();return}
+ if(el.dataset.ivname){const c=S.set.ivc.find(x=>x.id===el.dataset.ivname);if(c&&el.value.trim())c.name=el.value.trim();save();return}
+ if(el.dataset.tyname){const t=S.set.ck.types.find(x=>x.id===el.dataset.tyname);if(t&&el.value.trim())t.name=el.value.trim();save();return}
+ if(el.id==='title'){S.cur.title=el.value;save()}});
+addEventListener('hashchange',()=>{render();scrollTo(0,0)});
+render();
+(async()=>{try{if(!window.claude||!claude.use)return;const db=await claude.use('db'),user=await claude.use('user');if(!db||!user)return;
+ const id=await user.id();if(!id)return;const ref=db.doc('data/users/'+id+'/app'),snap=await ref.get();
+ if(snap.exists){const d=snap.data();if(d&&d.json){S=merge(JSON.parse(d.json));try{localStorage.setItem(KEY,d.json)}catch(e){}}}
+ dref=ref;synced=true;if(!snap.exists)flush();render()}catch(e){}})();
+}
+</script>
+</body>
+</html>
