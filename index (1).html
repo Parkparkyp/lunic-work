@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>루닉필름 실무</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 촬영장 실무 도구 — 짧고 단정하게, 한 손으로 쓰는 앱
+   IDEA: 카메라 모니터의 노출 오버레이 — 큰 숫자, 탈리 램프 같은 경고
+   PICTURE: 측정 결과 판독창(ISO·조리개·셔터·ND)이 첫 화면의 주인공
+   COLOUR and TYPE: 그래파이트/스톤 바탕, 탈리 레드 경고, 청록 OK · IBM Plex Sans KR
+   LAYOUT: 한 열, 하단 탭바, 카드 대신 선으로 나눈 판넬 */
+:root{color-scheme:light dark;
+--bg:light-dark(#ecebe7,#101214);--panel:light-dark(#fff,#191c1f);--ink:light-dark(#15171a,#eef0f1);
+--mute:light-dark(#5c6166,#9aa1a7);--line:light-dark(#d8d5cf,#2a2e33);--acc:#e0402e;
+--ok:light-dark(#0f7d6b,#4cc5ab);--soft:light-dark(#f5f4f1,#22262a);--warn:light-dark(#a3530a,#eda05a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans KR",system-ui,sans-serif;overflow-x:clip;
+padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(84px + env(safe-area-inset-bottom)) env(safe-area-inset-left)}
+main{max-width:720px;margin:0 auto;padding:16px 16px 24px}
+h1{font-size:32px;line-height:1.05;margin:8px 0 4px;text-wrap:balance}
+h2{font-size:20px;margin:28px 0 10px}
+h3{font-size:16px;margin:18px 0 6px}
+p{margin:6px 0}.mute{color:var(--mute);font-size:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lbl{font-size:13px;color:var(--mute);margin:12px 0 6px}
+.chip{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;padding:0 14px;min-height:40px;font:inherit;font-size:15px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;border:0;border-radius:14px;background:var(--acc);color:#fff;font:600 17px/1 inherit;font-family:inherit;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);min-height:44px;font-size:15px;font-weight:400}
+.btn.sm{width:auto;min-height:40px;padding:0 14px;font-size:14px}
+input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
+input[type=text],input[type=number],select{font:inherit;font-size:16px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:44px;width:100%}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.read{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.read div{padding:14px 10px;border-right:1px solid var(--line)}.read div:last-child{border-right:0}
+.read small{display:block;font-size:13px;color:var(--mute)}
+.read b{display:block;font-size:clamp(24px,7vw,38px);line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.read .hot{background:var(--acc);color:#fff}.read .hot small{color:#ffe1dc}
+.tally{display:flex;gap:10px;align-items:center;font-weight:600;padding:12px 14px;border-radius:12px;margin-top:10px}
+.tally.nd{background:var(--acc);color:#fff}.tally.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.tally.dark{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.lamp{width:12px;height:12px;border-radius:50%;background:currentColor;flex:none}
+.scale{position:relative;height:30px;margin:14px 0 4px;border-radius:8px;background:linear-gradient(90deg,#1d2226,#6a6f73 50%,#f2f2ef)}
+.scale i{position:absolute;top:-4px;bottom:-4px;width:4px;border-radius:2px;background:var(--acc);transform:translateX(-2px)}
+.scale span{position:absolute;bottom:-20px;font-size:12px;color:var(--mute);transform:translateX(-50%)}
+.kel{font-size:clamp(34px,10vw,52px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.notes{margin:10px 0 0;padding-left:18px;font-size:15px}
+ul.list{list-style:none;margin:0;padding:0}
+ul.list li{display:flex;gap:12px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--line);min-height:52px;cursor:pointer}
+ul.list li:last-child{border-bottom:0}
+.box{width:26px;height:26px;border:2px solid var(--line);border-radius:7px;flex:none;display:grid;place-items:center}
+li.on .box{background:var(--ok);border-color:var(--ok)}li.on .box::after{content:"";width:7px;height:13px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-2px)}
+li.on .t{color:var(--mute);text-decoration:line-through}
+.grp{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 4px}
+.grp h3{margin:0}.cnt{font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:8px 0 2px}.bar i{display:block;height:100%;background:var(--ok)}
+.ed{display:flex;gap:8px;margin:6px 0}.ed input{flex:1}
+.x{flex:none;width:44px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--mute);font-size:20px;cursor:pointer}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+details{border-top:1px solid var(--line);padding:4px 0}summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:600}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:62px;color:var(--mute);text-decoration:none;font-size:13px}
+nav a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+nav a[aria-current=page]{color:var(--ink);font-weight:600}nav a[aria-current=page] svg{stroke:var(--acc)}
+.sync{font-size:12px;color:var(--mute)}
+.steps{padding-left:20px;margin:6px 0 12px}.steps li{margin:4px 0}
+@media(max-width:420px){.read{grid-template-columns:repeat(2,minmax(0,1fr))}.read div:nth-child(2){border-right:0}.read div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media(prefers-reduced-motion:no-preference){.scale i{transition:left .4s ease}}
+</style>
+</head>
+<body>
+<main id="view"></main>
+<nav id="tabs">
+<a href="#measure" data-t="measure"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg>노출·WB</a>
+<a href="#check" data-t="check"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8 12 3 3 5-6"/></svg>체크리스트</a>
+<a href="#interview" data-t="interview"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>인터뷰</a>
+<a href="#setup" data-t="setup"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>설정</a>
+</nav>
+<script>
+{
+const uid=()=>Math.random().toString(36).slice(2,9);
+const L=a=>a.map(t=>({id:uid(),t}));
+const APS=[2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16,18,20,22];
+const ISOS=[100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600,32000,40000,51200];
+const FPS={24:50,25:50,30:60,50:100,60:125,120:250};
+const LIGHTS=[['sun','맑은 낮',5600],['cloud','흐림',6500],['shade','그늘',7500],['golden','해질녘',4300],['mix','창가+실내',4800],['led','백색 LED·형광',4500],['warmled','웜 LED',3500],['tung','전구·텅스텐',3200]];
+const IVC=[['groom','식전 · 신랑'],['bride','식전 · 신부'],['both','식전 · 신랑신부 공통'],['guest','식전 · 하객'],['parents','식전 · 혼주'],['after','식후']];
+const DEF=()=>({v:1,
+ set:{cams:[{id:'a7iv',name:'A7 IV',low:800,high:3200},{id:'a7v',name:'A7 V',low:800,high:0}],
+  lenses:['24-70 GM II','70-200 GM II'],fps:24,off:1,ndMax:6,calEv:0,calK:0,calAt:'',
+  iv:{groom:L(['지금 기분이 어떠세요?','신부를 처음 만났을 때 첫인상은?','신부에게 하고 싶은 한마디']),
+   bride:L(['오늘 아침 준비하면서 어떤 생각이 들었어요?','신랑의 어떤 점에 반했어요?','신랑에게 하고 싶은 한마디']),
+   both:L(['두 분은 어떻게 만나셨어요?','프러포즈는 어땠어요?','10년 뒤의 서로에게']),
+   guest:L(['신랑·신부와 어떤 사이세요?','두 사람에게 축하 한마디']),
+   parents:L(['자녀를 보내는 지금 마음은?','사위·며느리에게 한마디']),
+   after:L(['식을 마친 소감','가장 기억에 남는 순간','와주신 분들께 인사'])},
+  ck:{common:L(['배터리 완충 (바디·예비)','메모리카드 포맷','S-Log3 / S-Gamut3.Cine 확인','10bit 4:2:2 · 프레임레이트 확인','셔터 180° (프레임레이트 ×2)','센서·렌즈·ND 청소','무선마이크 충전·페어링','바디 간 시계 동기화','타임테이블·계약 내용 확인']),
+   types:[{id:'t1',name:'본식',items:L(['예식장 동선·조명 사전 확인','혼주 인터뷰 시간 조율','입장·반지 교환 촬영 위치 확인'])},
+    {id:'t2',name:'야외 촬영',items:L(['일몰 시간 확인','우천 플랜','이동 동선·주차'])},
+    {id:'t3',name:'식전 영상',items:L(['질문지 미리 공유','소품 준비'])}]}},
+ cur:{cam:'a7iv',lens:0,ap:2.8,spot:true,light:'auto',m:null,type:'t1',title:'',done:{},asked:{},extra:[]}});
+const KEY='lunic-work-v1';
+const merge=o=>{const d=DEF();if(!o||!o.set)return d;return{v:1,set:Object.assign(d.set,o.set),cur:Object.assign(d.cur,o.cur||{})}};
+let S;try{S=merge(JSON.parse(localStorage.getItem(KEY)))}catch(e){S=DEF()}
+let dref=null,synced=false,writing=false,pending=false,tmr=0,lastCal=null;
+const flush=async()=>{if(!dref)return;if(writing){pending=true;return}writing=true;
+ try{await dref.set({json:JSON.stringify(S),at:Date.now()})}catch(e){}writing=false;if(pending){pending=false;flush()}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}clearTimeout(tmr);tmr=setTimeout(flush,900)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const log2=Math.log2,r3=x=>Math.round(x*3)/3;
+const near=(arr,v)=>arr.reduce((a,b)=>Math.abs(log2(b/v))<Math.abs(log2(a/v))?b:a);
+const fs=x=>{const w=Math.floor(x+1e-6),f=Math.round((x-w)*3);if(f===3)return String(w+1);return((w||!f)?String(w):'')+(f===1?'⅓':f===2?'⅔':'')};
+const cam=()=>S.set.cams.find(c=>c.id===S.cur.cam)||S.set.cams[0];
+const shut=()=>FPS[S.set.fps]||Math.round(S.set.fps*2);
+
+/* ---------- EXIF + 밝기 ---------- */
+function readExif(buf){const v=new DataView(buf);if(v.byteLength<4||v.getUint16(0)!==0xFFD8)return null;let o=2;
+ while(o+10<v.byteLength){const m=v.getUint16(o);if((m&0xFF00)!==0xFF00)break;if(m===0xFFDA)break;const len=v.getUint16(o+2);
+  if(m===0xFFE1&&v.getUint32(o+4)===0x45786966)return tiff(v,o+10);o+=2+len}return null}
+function tiff(v,t){const le=v.getUint16(t)===0x4949,g16=p=>v.getUint16(p,le),g32=p=>v.getUint32(p,le);
+ const rd=ifd=>{const out={},n=g16(ifd);for(let i=0;i<n;i++){const e=ifd+2+i*12,tag=g16(e),ty=g16(e+2);let val;
+  if(ty===3)val=g16(e+8);else if(ty===4)val=g32(e+8);else if(ty===5||ty===10){const p=t+g32(e+8),a=ty===5?g32(p):v.getInt32(p,le),b=ty===5?g32(p+4):v.getInt32(p+4,le);val=b?a/b:0}out[tag]=val}return out};
+ try{const i0=rd(t+g32(t+4));if(!i0[0x8769])return null;const ex=rd(t+i0[0x8769]);return{t:ex[0x829A],n:ex[0x829D],iso:ex[0x8827]||ex[0x8833]}}catch(e){return null}}
+function lum(file,spot){return new Promise((res,rej)=>{const url=URL.createObjectURL(file),img=new Image();
+ img.onload=()=>{const W=200,H=Math.max(1,Math.round(W*img.naturalHeight/img.naturalWidth)),c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');x.drawImage(img,0,0,W,H);const f=spot?.4:1,sx=Math.round(W*(1-f)/2),sy=Math.round(H*(1-f)/2),sw=Math.max(1,Math.round(W*f)),sh=Math.max(1,Math.round(H*f));
+  const d=x.getImageData(sx,sy,sw,sh).data,lin=u=>{u/=255;return u<=.04045?u/12.92:((u+.055)/1.055)**2.4};let s=0,n=0;
+  for(let i=0;i<d.length;i+=4){s+=.2126*lin(d[i])+.7152*lin(d[i+1])+.0722*lin(d[i+2]);n++}URL.revokeObjectURL(url);res(s/n)};
+ img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('img'))};img.src=url})}
+async function shoot(file){const buf=await file.arrayBuffer(),ex=readExif(buf);let Y;try{Y=await lum(file,S.cur.spot)}catch(e){return{err:'이 사진 형식은 읽을 수 없어요. 카메라로 바로 찍어주세요.'}}
+ if(!ex||!ex.t||!ex.n||!ex.iso)return{err:'사진에 노출 정보(EXIF)가 없어요. 앨범 말고 "사진 찍어서 측정"으로 바로 찍어주세요.',Y};
+ return{raw:log2(ex.n*ex.n/ex.t)-log2(ex.iso/100)+log2(Math.max(Y,.002)/.18),ex,Y}}
+
+/* ---------- 노출 계산 ---------- */
+function plan(ev){const c=cam(),sh=shut(),t=1/sh,off=S.set.off,N=S.cur.ap;const r={iso:c.low,N,sh,nd:0,notes:[],state:'ok'};
+ const ndFor=(iso,ap)=>ev+log2(iso/100)-off-log2(ap*ap/t);let nd=ndFor(c.low,N);
+ if(nd>=-.17){r.nd=Math.max(0,r3(nd));
+  if(r.nd>S.set.ndMax){r.N=near(APS,N*2**((r.nd-S.set.ndMax)/2));r.nd=Math.max(0,Math.min(S.set.ndMax,r3(ndFor(c.low,r.N))));
+   r.notes.push(`ND 최대 ${fs(S.set.ndMax)}스톱을 넘어서 조리개를 f/${r.N}로 조였어요.`)}
+ }else{const def=-nd,need=c.low*2**def;
+  if(N>2.8)r.notes.push(`f/2.8로 열면 ${fs(r3(2*log2(N/2.8)))}스톱 더 밝아져요.`);
+  if(c.high&&need>c.low*1.26){if(need<=c.high){r.iso=c.high;r.nd=r3(log2(c.high/need));r.notes.push(`두 번째 베이스 ISO ${c.high}로 올리고 남는 밝기는 ND로 줄여요. ND 없이 ISO ${near(ISOS,need)}로 찍어도 돼요.`)}
+   else{r.iso=near(ISOS,need);r.notes.push(`두 번째 베이스 ISO ${c.high}보다 높아요.`)}}
+  else r.iso=near(ISOS,need);
+  if(r.iso>(c.high||c.low)*2){r.state='dark';r.notes.push('노이즈가 커지는 구간이에요. 조명을 보강하거나 오프셋을 줄이세요.')}
+  else if(r.nd<.17)r.state='up'}
+ if(r.nd<.17)r.nd=0;if(r.nd>0)r.state='nd';return r}
+function lightFor(ev){if(S.cur.light!=='auto'){const l=LIGHTS.find(x=>x[0]===S.cur.light);return{l,guess:false}}
+ if(ev==null)return{l:null};const id=ev>=13?'sun':ev>=11?'cloud':ev>=9?'mix':'led';return{l:LIGHTS.find(x=>x[0]===id),guess:true,indoor:ev<9}}
+
+/* ---------- 화면 ---------- */
+const chip=(act,val,on,txt)=>`<button class="chip" data-act="${act}" data-v="${esc(val)}" aria-pressed="${on}">${txt}</button>`;
+function vMeasure(){const c=cam(),m=S.cur.m,ev=m?m.raw+S.set.calEv:null,p=m?plan(ev):null;
+ const pos=ev==null?50:Math.max(2,Math.min(98,(ev-2)/(17-2)*100));
+ let h=`<h1>노출 · 화이트밸런스</h1><p class="mute">${esc(c.name)} · S-Log3 / S-Gamut3.Cine · 10bit 4:2:2 · ${S.set.fps}p · 오프셋 +${fs(S.set.off)}스톱</p>`;
+ h+=`<div class="read" aria-live="polite">
+ <div><small>ISO</small><b>${p?p.iso:'—'}</b></div><div><small>조리개</small><b>${p?'f/'+p.N:'f/'+S.cur.ap}</b></div>
+ <div><small>셔터</small><b>1/${shut()}</b></div><div class="${p&&p.nd?'hot':''}"><small>ND</small><b>${p?(p.nd?fs(p.nd)+'스톱':'없음'):'—'}</b></div></div>`;
+ if(p){const tl=p.state==='nd'?`<div class="tally nd"><span class="lamp"></span>ND 필터 장착 요망 · ${fs(p.nd)}스톱 (ND${Math.round(2**p.nd)})</div>`
+  :p.state==='dark'?`<div class="tally dark"><span class="lamp"></span>빛이 부족해요 · ISO ${p.iso}</div>`
+  :p.state==='up'?`<div class="tally dark"><span class="lamp"></span>베이스보다 ISO를 올려야 해요 · ISO ${p.iso}</div>`
+  :`<div class="tally ok"><span class="lamp"></span>베이스 ISO 그대로, ND 없이 OK</div>`;
+  h+=tl+(p.notes.length?`<ul class="notes">${p.notes.map(n=>`<li>${n}</li>`).join('')}</ul>`:'');
+  h+=`<div class="scale" aria-hidden="true"><i style="left:${pos}%"></i><span style="left:7%">실내</span><span style="left:50%">흐림</span><span style="left:90%">맑음</span></div>
+  <p class="mute" style="margin-top:26px">장면 EV ${ev.toFixed(1)} · 폰 ${m.ex?`ISO ${m.ex.iso}, 1/${Math.round(1/m.ex.t)}, f/${(+m.ex.n).toFixed(2)}`:''}${S.set.calAt?' · 영점 적용':' · <b style="color:var(--acc)">영점 안 잡음</b>'}</p>`}
+ else h+=`<p class="mute" style="margin-top:12px">그레이카드나 피사체 얼굴 쪽을 화면 가운데 두고 찍으면 추천값이 나와요.</p>`;
+ h+=`<div style="margin-top:14px"><label class="btn" for="f1">사진 찍어서 측정</label><input id="f1" type="file" accept="image/*" capture="environment" data-file="measure"></div>
+ <div class="row" style="margin-top:8px"><label class="btn ghost" for="f2" style="flex:1">앨범에서 고르기</label><input id="f2" type="file" accept="image/*" data-file="measure"></div>
+ <div id="merr"></div>`;
+ h+=`<div class="panel"><div class="lbl" style="margin-top:0">카메라</div><div class="row">${S.set.cams.map(x=>chip('cam',x.id,x.id===S.cur.cam,esc(x.name))).join('')}</div>
+ <div class="lbl">렌즈</div><div class="row">${S.set.lenses.map((x,i)=>chip('lens',i,i===S.cur.lens,esc(x))).join('')}</div>
+ <div class="lbl">원하는 조리개</div><div class="row">${[2.8,4,5.6,8,11].map(a=>chip('ap',a,a===S.cur.ap,'f/'+a)).join('')}</div>
+ <div class="lbl">프레임레이트 (셔터 자동)</div><div class="row">${[24,30,60,120].map(f=>chip('fps',f,f===S.set.fps,f+'p')).join('')}</div>
+ <div class="lbl">측광 범위</div><div class="row">${chip('spot',1,S.cur.spot,'가운데 40% (그레이카드)')}${chip('spot',0,!S.cur.spot,'화면 전체')}</div></div>`;
+ const w=lightFor(ev),K=w.l?Math.round((w.l[2]+S.set.calK)/100)*100:null;
+ h+=`<h2>화이트밸런스</h2><div class="panel"><div class="kel">${K?K+'K':'—'}</div>
+ <p class="mute">${w.l?(w.guess?`밝기로 추정: ${w.l[1]}${w.indoor?' · 실내라면 아래에서 조명 종류를 골라주세요':''}`:w.l[1]):'측정하거나 조명 종류를 고르세요'}${S.set.calK?` · 영점 ${S.set.calK>0?'+':''}${S.set.calK}K`:''}</p>
+ <div class="row" style="margin-top:10px">${chip('light','auto',S.cur.light==='auto','자동 추정')}${LIGHTS.map(l=>chip('light',l[0],S.cur.light===l[0],l[1])).join('')}</div>
+ <p class="mute" style="margin-top:12px">폰 사진은 자동으로 색이 보정돼서 켈빈을 직접 읽을 수 없어요. 조명 종류로 추천하고, 정확한 값은 A7 커스텀 WB로 잡아주세요.</p></div>`;
+ return h}
+function vCheck(){const ty=S.set.ck.types.find(t=>t.id===S.cur.type)||S.set.ck.types[0];
+ const groups=[['공통',S.set.ck.common,'common'],[ty?ty.name:'촬영 종류',ty?ty.items:[],'type'],['이번 촬영만',S.cur.extra,'extra']];
+ const all=groups.flatMap(g=>g[1]),done=all.filter(i=>S.cur.done[i.id]).length;
+ let h=`<h1>촬영 전 체크리스트</h1><input type="text" id="title" placeholder="촬영 이름 (예: 11/22 김○○ 본식)" value="${esc(S.cur.title)}" style="margin:8px 0">
+ <div class="row">${S.set.ck.types.map(t=>chip('type',t.id,ty&&t.id===ty.id,esc(t.name))).join('')}</div>
+ <div class="bar"><i style="width:${all.length?done/all.length*100:0}%"></i></div><p class="cnt">${done} / ${all.length} 완료</p>`;
+ for(const[n,items,k]of groups){const d=items.filter(i=>S.cur.done[i.id]).length;
+  h+=`<div class="grp"><h3>${esc(n)}</h3><span class="cnt">${d}/${items.length}</span></div><div class="panel" style="padding:4px 14px;margin-top:6px">`;
+  h+=items.length?`<ul class="list">${items.map(i=>`<li data-act="tick" data-v="${i.id}" class="${S.cur.done[i.id]?'on':''}" role="checkbox" aria-checked="${!!S.cur.done[i.id]}" tabindex="0"><span class="box"></span><span class="t" style="flex:1">${esc(i.t)}</span>${k==='extra'?`<button class="x" data-act="delextra" data-v="${i.id}" aria-label="삭제">×</button>`:''}</li>`).join('')}</ul>`:`<p class="mute" style="padding:10px 0">항목이 없어요.</p>`;
+  if(k==='extra')h+=`<form class="ed" data-form="extra" style="padding-bottom:10px"><input type="text" name="t" placeholder="이번 촬영만 챙길 것 추가"><button class="btn sm">추가</button></form>`;
+  h+=`</div>`}
+ h+=`<button class="btn ghost" data-act="resetcheck" style="margin-top:14px">새 촬영 시작 (체크·이번 촬영 항목 비우기)</button><p class="mute" style="margin-top:8px">공통·종류별 항목은 설정에서 바꿔요.</p>`;return h}
+function vIv(){const all=IVC.flatMap(c=>S.set.iv[c[0]]||[]),done=all.filter(q=>S.cur.asked[q.id]).length;
+ let h=`<h1>인터뷰 목록</h1><p class="mute">물어본 질문을 탭해서 표시하세요.</p><div class="bar"><i style="width:${all.length?done/all.length*100:0}%"></i></div><p class="cnt">${done} / ${all.length}</p>`;
+ for(const[k,n]of IVC){const qs=S.set.iv[k]||[],d=qs.filter(q=>S.cur.asked[q.id]).length;
+  h+=`<div class="grp"><h3>${n}</h3><span class="cnt">${d}/${qs.length}</span></div><div class="panel" style="padding:4px 14px;margin-top:6px">`+
+  (qs.length?`<ul class="list">${qs.map(q=>`<li data-act="ask" data-v="${q.id}" class="${S.cur.asked[q.id]?'on':''}" role="checkbox" aria-checked="${!!S.cur.asked[q.id]}" tabindex="0"><span class="box"></span><span class="t">${esc(q.t)}</span></li>`).join('')}</ul>`:`<p class="mute" style="padding:10px 0">설정에서 질문을 추가하세요.</p>`)+`</div>`}
+ h+=`<button class="btn ghost" data-act="resetiv" style="margin-top:14px">표시 모두 지우기</button>`;return h}
+const ed=(key,items,ph)=>`${items.map(i=>`<div class="ed"><input type="text" data-edit="${key}" data-id="${i.id}" value="${esc(i.t)}" aria-label="항목"><button class="x" data-act="del" data-k="${key}" data-v="${i.id}" aria-label="삭제">×</button></div>`).join('')}
+ <form class="ed" data-form="add" data-k="${key}"><input type="text" name="t" placeholder="${ph}"><button class="btn sm">추가</button></form>`;
+function vSet(){const s=S.set,c=cam();let h=`<h1>설정</h1><p class="sync">${synced?'기기 간 동기화돼요':'이 기기 브라우저에만 저장돼요'}</p>`;
+ h+=`<h2>영점 잡기</h2><div class="panel"><p class="mute" style="margin-top:0">${s.calAt?`마지막 영점: ${esc(s.calAt)} · 노출 ${s.calEv>=0?'+':''}${s.calEv.toFixed(2)}스톱`:'아직 영점을 안 잡았어요. 처음 한 번은 꼭 해주세요.'}</p>
+ <ol class="steps"><li>고른 조명 아래 그레이카드가 화면을 채우게 두세요.</li><li>${esc(c.name)}를 S-Log3, 베이스 ISO, 셔터 1/${shut()}로 두고 웨이브폼으로 평소 찍는 밝기(오프셋 포함)를 맞추세요.</li><li>그때의 값을 아래에 넣고, 같은 자리에서 폰으로 카드를 찍으세요.</li></ol>
+ <div class="grid2"><label>조리개<select id="c_ap">${APS.map(a=>`<option ${a===2.8?'selected':''}>${a}</option>`).join('')}</select></label>
+ <label>셔터 1/<input type="number" id="c_sh" value="${shut()}" inputmode="numeric"></label>
+ <label>ISO<input type="number" id="c_iso" value="${c.low}" inputmode="numeric"></label>
+ <label>ND (스톱)<input type="number" id="c_nd" value="0" step="0.33" inputmode="decimal"></label></div>
+ <div style="margin-top:12px"><label class="btn" for="f3">그레이카드 찍어서 영점 저장</label><input id="f3" type="file" accept="image/*" capture="environment" data-file="cal"></div><div id="cerr">${lastCal?`<p class="mute">${lastCal}</p>`:''}</div>
+ <h3>화이트밸런스 영점</h3><p class="mute">같은 카드로 A7 커스텀 WB를 잡고, 나온 켈빈과 지금 조명 종류를 넣으세요.</p>
+ <div class="grid2"><label>A7 켈빈<input type="number" id="k_val" placeholder="예: 5200" inputmode="numeric"></label><label>지금 조명<select id="k_l">${LIGHTS.map(l=>`<option value="${l[0]}">${l[1]} (${l[2]}K)</option>`).join('')}</select></label></div>
+ <div class="row" style="margin-top:10px"><button class="btn sm" data-act="calk">WB 영점 저장</button><button class="btn ghost sm" style="width:auto" data-act="calreset">영점 초기화</button></div></div>`;
+ h+=`<h2>카메라 · 노출</h2><div class="panel">${s.cams.map((x,i)=>`<h3 style="margin-top:${i?18:0}px">${esc(x.name)}</h3><div class="grid2"><label>S-Log3 베이스 ISO<input type="number" data-cam="${i}" data-f="low" value="${x.low}" inputmode="numeric"></label><label>두 번째 베이스 (없으면 0)<input type="number" data-cam="${i}" data-f="high" value="${x.high}" inputmode="numeric"></label></div>${x.id==='a7v'?'<p class="mute">A7 V의 S-Log3 베이스 ISO는 확인 전이라 800으로 넣어뒀어요. 카메라에서 S-Log3일 때 가장 낮은 ISO와 두 번째 베이스를 확인해서 고쳐주세요.</p>':''}`).join('')}
+ <div class="grid2" style="margin-top:14px"><label>S-Log3 오프셋 (스톱)<select id="s_off">${[0,1/3,2/3,1,4/3,5/3,2].map(v=>`<option value="${v}" ${Math.abs(v-s.off)<.01?'selected':''}>+${fs(v)}</option>`).join('')}</select></label>
+ <label>ND 최대 (스톱)<input type="number" id="s_nd" value="${s.ndMax}" step="0.33" inputmode="decimal"></label></div></div>`;
+ h+=`<h2>인터뷰 질문</h2><div class="panel">${IVC.map(([k,n])=>`<details><summary>${n} (${(s.iv[k]||[]).length})</summary>${ed('iv:'+k,s.iv[k]||[],'질문 추가')}</details>`).join('')}</div>`;
+ h+=`<h2>체크리스트 항목</h2><div class="panel"><details><summary>공통 (${s.ck.common.length})</summary>${ed('ck:common',s.ck.common,'공통 항목 추가')}</details>
+ ${s.ck.types.map(t=>`<details><summary>${esc(t.name)} (${t.items.length})</summary><div class="ed"><input type="text" data-tyname="${t.id}" value="${esc(t.name)}" aria-label="종류 이름"><button class="x" data-act="deltype" data-v="${t.id}" aria-label="종류 삭제">×</button></div><p class="mute">항목</p>${ed('ty:'+t.id,t.items,'항목 추가')}</details>`).join('')}
+ <form class="ed" data-form="type" style="margin-top:10px"><input type="text" name="t" placeholder="촬영 종류 추가 (예: 돌잔치)"><button class="btn sm">추가</button></form></div>
+ <p class="mute" style="margin-top:16px">처음 들어있는 질문과 항목은 예시예요. 자유롭게 바꿔 쓰세요.</p>`;return h}
+
+const V={measure:vMeasure,check:vCheck,interview:vIv,setup:vSet};
+const tab=()=>{const t=location.hash.slice(1);return V[t]?t:'measure'};
+function render(){const t=tab(),y=window.scrollY;document.getElementById('view').innerHTML=V[t]();
+ document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.dataset.t===t?'page':'false'));window.scrollTo(0,y)}
+const list=k=>{const[a,b]=k.split(':');if(a==='iv')return S.set.iv[b]||(S.set.iv[b]=[]);if(a==='ck')return S.set.ck.common;const t=S.set.ck.types.find(x=>x.id===b);return t?t.items:[]};
+const upd=()=>{save();render()};
+
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,v=el.dataset.v,c=S.cur;
+ if(el.tagName==='BUTTON'&&el.form)e.preventDefault();
+ if(a==='cam')c.cam=v;else if(a==='lens')c.lens=+v;else if(a==='ap')c.ap=+v;else if(a==='fps')S.set.fps=+v;else if(a==='spot')c.spot=v==='1';
+ else if(a==='light')c.light=v;else if(a==='type')c.type=v;
+ else if(a==='tick'){if(e.target.closest('.x'))return;c.done[v]=!c.done[v]}else if(a==='ask')c.asked[v]=!c.asked[v];
+ else if(a==='delextra'){e.stopPropagation();c.extra=c.extra.filter(i=>i.id!==v)}
+ else if(a==='resetcheck'){c.done={};c.extra=[];c.title=''}else if(a==='resetiv')c.asked={};
+ else if(a==='del'){const L2=list(el.dataset.k),i=L2.findIndex(x=>x.id===v);if(i>-1)L2.splice(i,1)}
+ else if(a==='deltype'){if(S.set.ck.types.length<2)return;S.set.ck.types=S.set.ck.types.filter(t=>t.id!==v);if(c.type===v)c.type=S.set.ck.types[0].id}
+ else if(a==='calk'){const k=+document.getElementById('k_val').value,l=LIGHTS.find(x=>x[0]===document.getElementById('k_l').value);if(!(k>1500&&k<12000))return;S.set.calK=Math.round((k-l[2])/100)*100}
+ else if(a==='calreset'){S.set.calEv=0;S.set.calK=0;S.set.calAt='';lastCal=null}
+ else return;upd()});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('li[data-act]')){e.preventDefault();e.target.click()}});
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target,t=(f.t&&f.t.value||'').trim();if(!t)return;
+ if(f.dataset.form==='add')list(f.dataset.k).push({id:uid(),t});else if(f.dataset.form==='extra')S.cur.extra.push({id:uid(),t});
+ else if(f.dataset.form==='type'){const id='t'+uid();S.set.ck.types.push({id,name:t,items:[]})}upd()});
+document.addEventListener('change',e=>{const el=e.target;
+ if(el.dataset.edit){const it=list(el.dataset.edit).find(x=>x.id===el.dataset.id);if(it&&el.value.trim())it.t=el.value.trim();save();return}
+ if(el.dataset.tyname){const t=S.set.ck.types.find(x=>x.id===el.dataset.tyname);if(t&&el.value.trim())t.name=el.value.trim();save();return}
+ if(el.dataset.cam){const n=+el.value;if(n>=0)S.set.cams[+el.dataset.cam][el.dataset.f]=n;save();return}
+ if(el.id==='title'){S.cur.title=el.value;save();return}
+ if(el.id==='s_off'){S.set.off=+el.value;save();return}
+ if(el.id==='s_nd'){const n=+el.value;if(n>=0)S.set.ndMax=n;save();return}
+ if(el.dataset.file&&el.files&&el.files[0])onFile(el.dataset.file,el.files[0])});
+async function onFile(kind,file){const box=document.getElementById(kind==='cal'?'cerr':'merr');if(box)box.innerHTML='<p class="mute">읽는 중…</p>';
+ const r=await shoot(file);if(r.err){if(box)box.innerHTML=`<p style="color:var(--acc)">${r.err}</p>`;return}
+ if(kind==='measure'){S.cur.m={raw:r.raw,ex:r.ex};upd();return}
+ const N=+document.getElementById('c_ap').value,sh=+document.getElementById('c_sh').value,iso=+document.getElementById('c_iso').value,nd=+document.getElementById('c_nd').value||0;
+ if(!(N>0&&sh>0&&iso>0)){box.innerHTML='<p style="color:var(--acc)">조리개·셔터·ISO를 확인해주세요.</p>';return}
+ const truth=log2(N*N*sh)+nd-log2(iso/100)+S.set.off;S.set.calEv=truth-r.raw;
+ const d=new Date();S.set.calAt=`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+ lastCal=`영점 저장됨 · 폰 측정값을 ${S.set.calEv>=0?'+':''}${S.set.calEv.toFixed(2)}스톱 보정해요. 다른 조명에서 한 번 더 비교해 보세요.`;upd()}
+addEventListener('hashchange',()=>{render();scrollTo(0,0)});
+render();
+(async()=>{try{if(!window.claude||!claude.use)return;const db=await claude.use('db'),user=await claude.use('user');if(!db||!user)return;
+ const id=await user.id();if(!id)return;const ref=db.doc('data/users/'+id+'/app'),snap=await ref.get();
+ if(snap.exists){const d=snap.data();if(d&&d.json){S=merge(JSON.parse(d.json));try{localStorage.setItem(KEY,d.json)}catch(e){}}}
+ dref=ref;synced=true;if(!snap.exists)flush();render()}catch(e){}})();
+}
+</script>
+</body>
+</html>
