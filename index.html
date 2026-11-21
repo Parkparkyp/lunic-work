@@ -42,7 +42,7 @@ p{margin:6px 0}.mute{color:var(--mute);font-size:14px}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);min-height:44px;font-size:15px;font-weight:400}
 .btn.sm{width:auto;min-height:40px;padding:0 14px;font-size:14px}
 input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
-input[type=text],input[type=number],select{font:inherit;font-size:16px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:44px;width:100%}
+input[type=text],input[type=number],input[type=url],select{font:inherit;font-size:16px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:44px;width:100%}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .read{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
 .read div{padding:14px 10px;border-right:1px solid var(--line)}.read div:last-child{border-right:0}
@@ -71,7 +71,7 @@ li.on .t{color:var(--mute);text-decoration:line-through}
 .x{flex:none;width:44px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--mute);font-size:20px;cursor:pointer}
 .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 details{border-top:1px solid var(--line);padding:4px 0}summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:600}
-nav{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:5}
 nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:62px;color:var(--mute);text-decoration:none;font-size:13px}
 nav a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
 nav a[aria-current=page]{color:var(--ink);font-weight:600}nav a[aria-current=page] svg{stroke:var(--acc)}
@@ -82,6 +82,17 @@ nav a[aria-current=page]{color:var(--ink);font-weight:600}nav a[aria-current=pag
 .vwrap .spot{position:absolute;left:30%;top:30%;width:40%;height:40%;border:2px solid #fff;border-radius:6px;box-shadow:0 0 0 1px rgba(0,0,0,.45)}
 .vwrap.full .spot{display:none}
 .vwrap .live{position:absolute;left:10px;top:10px;background:var(--acc);color:#fff;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.sum>div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.sum small{display:block;font-size:13px;color:var(--mute)}.sum b{display:block;font-size:clamp(22px,6vw,30px);line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sum span{font-size:13px;color:var(--mute)}.neg{color:var(--acc)}
+.wi{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.wi:last-child{border-bottom:0}
+.wi img,.noimg{width:76px;height:76px;border-radius:10px;object-fit:cover;flex:none;background:var(--soft);border:1px solid var(--line)}
+.wb{flex:1}.wn{font-weight:600;line-height:1.35}.wp{font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums}
+.wa{margin-top:8px;gap:6px}.wa .chip{min-height:36px;padding:0 12px;font-size:14px;text-decoration:none;display:inline-flex;align-items:center}.wa .x{width:36px;min-height:36px;font-size:18px}
+.wi.done .wn{text-decoration:line-through;color:var(--mute)}
+form label:not(.btn){display:block;font-size:13px;color:var(--mute);margin-top:10px}form label input,form label select{margin-top:4px}
+#wprev img{width:76px;height:76px;border-radius:10px;object-fit:cover;border:1px solid var(--line)}
 @media(max-width:420px){.read{grid-template-columns:repeat(2,minmax(0,1fr))}.read div:nth-child(2){border-right:0}.read div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
 @media(prefers-reduced-motion:no-preference){.scale i{transition:left .4s ease}}
 </style>
@@ -91,6 +102,7 @@ nav a[aria-current=page]{color:var(--ink);font-weight:600}nav a[aria-current=pag
 <nav id="tabs">
 <a href="#check" data-t="check"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8 12 3 3 5-6"/></svg>체크리스트</a>
 <a href="#interview" data-t="interview"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>인터뷰</a>
+<a href="#wish" data-t="wish"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>위시리스트</a>
 <a href="#setup" data-t="setup"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>설정</a>
 </nav>
 <script>
@@ -109,10 +121,12 @@ const DEF=()=>({v:1,
   ck:{common:L(['배터리 완충 (바디·예비)','메모리카드 포맷','S-Log3 / S-Gamut3.Cine 확인','10bit 4:2:2 · 프레임레이트 확인','셔터 180° (프레임레이트 ×2)','센서·렌즈·ND 청소','무선마이크 충전·페어링','바디 간 시계 동기화','타임테이블·계약 내용 확인']),
    types:[{id:'t1',name:'본식',items:L(['예식장 동선·조명 사전 확인','혼주 인터뷰 시간 조율','입장·반지 교환 촬영 위치 확인'])},
     {id:'t2',name:'야외 촬영',items:L(['일몰 시간 확인','우천 플랜','이동 동선·주차'])},
-    {id:'t3',name:'식전 영상',items:L(['질문지 미리 공유','소품 준비'])}]}},
+    {id:'t3',name:'식전 영상',items:L(['질문지 미리 공유','소품 준비'])}]},
+  wcats:L(['바디','렌즈','조명','오디오','액세서리','기타']),budget:0},
+ wish:[],
  cur:{type:'t1',title:'',done:{},asked:{},extra:[]}});
 const KEY='lunic-work-v1';
-const merge=o=>{const d=DEF();if(!o||!o.set)return d;return{v:1,set:Object.assign(d.set,o.set),cur:Object.assign(d.cur,o.cur||{})}};
+const merge=o=>{const d=DEF();if(!o||!o.set)return d;return{v:1,set:Object.assign(d.set,o.set),cur:Object.assign(d.cur,o.cur||{}),wish:Array.isArray(o.wish)?o.wish:[]}};
 let S;try{S=merge(JSON.parse(localStorage.getItem(KEY)))}catch(e){S=DEF()}
 let dref=null,synced=false,writing=false,pending=false,tmr=0;
 const flush=async()=>{if(!dref)return;if(writing){pending=true;return}writing=true;
@@ -141,19 +155,96 @@ function vIv(){const cats=S.set.ivc,all=cats.flatMap(c=>S.set.iv[c.id]||[]),done
 const ed=(key,items,ph)=>`${items.map(i=>`<div class="ed"><input type="text" data-edit="${key}" data-id="${i.id}" value="${esc(i.t)}" aria-label="항목"><button class="x" data-act="del" data-k="${key}" data-v="${i.id}" aria-label="삭제">×</button></div>`).join('')}
  <form class="ed" data-form="add" data-k="${key}"><input type="text" name="t" placeholder="${ph}"><button class="btn sm">추가</button></form>`;
 function vSet(){const s=S.set;let h=`<h1>설정</h1><p class="sync">${synced?'기기 간 동기화돼요':'이 기기 브라우저에만 저장돼요'}</p>`;
- h+=`<h2>인터뷰 질문</h2><div class="panel">${s.ivc.map(c=>`<details><summary>${esc(c.name)} (${(s.iv[c.id]||[]).length})</summary><div class="ed"><input type="text" data-ivname="${c.id}" value="${esc(c.name)}" aria-label="타이틀 이름"><button class="x" data-act="delcat" data-v="${c.id}" aria-label="타이틀 삭제">×</button></div><p class="mute">질문</p>${ed('iv:'+c.id,s.iv[c.id]||[],'질문 추가')}</details>`).join('')}
+ h+=`<h2>인터뷰 질문</h2><div class="panel">${s.ivc.map(c=>`<details data-key="iv:${c.id}"><summary>${esc(c.name)} (${(s.iv[c.id]||[]).length})</summary><div class="ed"><input type="text" data-ivname="${c.id}" value="${esc(c.name)}" aria-label="타이틀 이름"><button class="x" data-act="delcat" data-v="${c.id}" aria-label="타이틀 삭제">×</button></div><p class="mute">질문</p>${ed('iv:'+c.id,s.iv[c.id]||[],'질문 추가')}</details>`).join('')}
  <form class="ed" data-form="ivcat" style="margin-top:10px"><input type="text" name="t" placeholder="타이틀 추가 (예: 식후 · 친구)"><button class="btn sm">추가</button></form></div>`;
- h+=`<h2>체크리스트 항목</h2><div class="panel"><details><summary>공통 (${s.ck.common.length})</summary>${ed('ck:common',s.ck.common,'공통 항목 추가')}</details>
- ${s.ck.types.map(t=>`<details><summary>${esc(t.name)} (${t.items.length})</summary><div class="ed"><input type="text" data-tyname="${t.id}" value="${esc(t.name)}" aria-label="종류 이름"><button class="x" data-act="deltype" data-v="${t.id}" aria-label="종류 삭제">×</button></div><p class="mute">항목</p>${ed('ty:'+t.id,t.items,'항목 추가')}</details>`).join('')}
- <form class="ed" data-form="type" style="margin-top:10px"><input type="text" name="t" placeholder="촬영 종류 추가 (예: 돌잔치)"><button class="btn sm">추가</button></form></div>
+ h+=`<h2>체크리스트 항목</h2><div class="panel"><details data-key="ck:common"><summary>공통 (${s.ck.common.length})</summary>${ed('ck:common',s.ck.common,'공통 항목 추가')}</details>
+ ${s.ck.types.map(t=>`<details data-key="ty:${t.id}"><summary>${esc(t.name)} (${t.items.length})</summary><div class="ed"><input type="text" data-tyname="${t.id}" value="${esc(t.name)}" aria-label="종류 이름"><button class="x" data-act="deltype" data-v="${t.id}" aria-label="종류 삭제">×</button></div><p class="mute">항목</p>${ed('ty:'+t.id,t.items,'항목 추가')}</details>`).join('')}
+ <form class="ed" data-form="type" style="margin-top:10px"><input type="text" name="t" placeholder="촬영 종류 추가 (예: 돌잔치)"><button class="btn sm">추가</button></form></div>`;
+ h+=`<h2>위시리스트</h2><div class="panel"><form data-form="budget" class="ed" style="margin:0"><label style="flex:1;margin:0">예산 (0이면 안 씀)<input type="text" name="b" inputmode="numeric" value="${s.budget?s.budget.toLocaleString('ko-KR'):''}" placeholder="예: 3,000,000"></label><button class="btn sm" style="align-self:flex-end">저장</button></form>
+ <details data-key="wc"><summary>분류 (${s.wcats.length})</summary>${ed('wc:x',s.wcats,'분류 추가')}</details></div>
  <p class="mute" style="margin-top:16px">처음 들어있는 질문과 항목은 예시예요. 자유롭게 바꿔 쓰세요.</p>`;return h}
 
-const V={check:vCheck,interview:vIv,setup:vSet};
+/* ---------- 위시리스트 ---------- */
+const PRI=[['now','급함'],['next','다음'],['later','언젠가']];
+const won=n=>(n||0).toLocaleString('ko-KR')+'원';
+const sum=a=>a.reduce((t,w)=>t+(w.price||0),0);
+const catName=id=>{const c=S.set.wcats.find(x=>x.id===id);return c?c.t:'기타'};
+const safeUrl=u=>{u=String(u||'').trim();if(!u)return'';return/^https?:\/\//i.test(u)?u:'https://'+u};
+const idb=(()=>{let p;const open=()=>p||(p=new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('no idb'));const r=indexedDB.open('lunic-photos',1);
+ r.onupgradeneeded=()=>r.result.createObjectStore('p');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+ const tx=(m,f)=>open().then(db=>new Promise((res,rej)=>{const t=db.transaction('p',m),q=f(t.objectStore('p'));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)}));
+ return{get:k=>tx('readonly',s=>s.get(k)),put:(k,v)=>tx('readwrite',s=>s.put(v,k)),del:k=>tx('readwrite',s=>s.delete(k))}})();
+const PH={},tried=new Set();
+async function loadPhotos(){let got=false;for(const w of S.wish){if(!w.photo||PH[w.id]||tried.has(w.id))continue;tried.add(w.id);
+ try{const b=await idb.get(w.id);if(b){PH[w.id]=URL.createObjectURL(b);got=true}}catch(e){}}if(got&&tab()==='wish')render()}
+function shrink(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file),img=new Image();
+ img.onload=()=>{const m=800,k=Math.min(1,m/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');
+  c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+  c.toBlob(b=>b?res(b):rej(new Error('blob')),'image/jpeg',.8)};
+ img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('img'))};img.src=url})}
+let wOpen=false,wEdit=null,wPhoto=null; // wPhoto: Blob | 'remove' | null
+function wForm(){const w=wEdit?S.wish.find(x=>x.id===wEdit):null,o=w||{};
+ const hasPh=wPhoto instanceof Blob||(w&&w.photo&&wPhoto!=='remove');
+ const prev=wPhoto instanceof Blob?URL.createObjectURL(wPhoto):(w&&PH[w.id]&&wPhoto!=='remove'?PH[w.id]:'');
+ return`<form class="panel" data-form="wish" id="wform"><h3 style="margin-top:0">${w?'물건 수정':'새 물건'}</h3>
+ <label>이름<input type="text" name="name" value="${esc(o.name||'')}" placeholder="예: FX3 케이지" required></label>
+ <div class="grid2"><label>가격<input type="text" name="price" inputmode="numeric" value="${o.price?o.price.toLocaleString('ko-KR'):''}" placeholder="예: 1,890,000"></label>
+ <label>분류<select name="cat">${S.set.wcats.map(c=>`<option value="${c.id}" ${o.cat===c.id?'selected':''}>${esc(c.t)}</option>`).join('')}</select></label></div>
+ <label>우선순위<select name="pri">${PRI.map(([v,n])=>`<option value="${v}" ${(o.pri||'next')===v?'selected':''}>${n}</option>`).join('')}</select></label>
+ <label>구매 링크<input type="url" name="link" value="${esc(o.link||'')}" placeholder="https://"></label>
+ <label>메모<input type="text" name="memo" value="${esc(o.memo||'')}" placeholder="예: 중고 120만 이하면 구매"></label>
+ <div class="lbl">사진</div><div class="row"><span id="wprev">${prev?`<img src="${prev}" alt="">`:''}</span>
+ <label class="btn ghost sm" for="wph" style="width:auto">${hasPh?'사진 바꾸기':'사진 선택'}</label><input id="wph" type="file" accept="image/*">
+ ${hasPh?'<button type="button" class="chip" data-act="wphrm">사진 빼기</button>':''}</div><p class="mute" id="wmsg"></p>
+ <div class="row" style="margin-top:12px"><button class="btn" style="flex:1">저장</button><button type="button" class="btn ghost" data-act="wcancel" style="flex:1;min-height:56px">취소</button></div></form>`}
+function card(w){return`<div class="wi ${w.done?'done':''}">${PH[w.id]?`<img src="${PH[w.id]}" alt="">`:'<div class="noimg"></div>'}
+ <div class="wb"><div class="wn">${esc(w.name)}</div><div class="wp">${w.price?won(w.price):'가격 미정'} · ${esc(catName(w.cat))}</div>
+ ${w.memo?`<p class="mute" style="margin:4px 0 0">${esc(w.memo)}</p>`:''}
+ <div class="row wa">${w.link?`<a class="chip" href="${esc(safeUrl(w.link))}" target="_blank" rel="noopener">링크</a>`:''}
+ <button class="chip" data-act="wdone" data-v="${w.id}">${w.done?'되돌리기':'구매 완료'}</button><button class="chip" data-act="wedit" data-v="${w.id}">수정</button>
+ <button class="x" data-act="wdel" data-v="${w.id}" aria-label="삭제">×</button></div></div></div>`}
+function vWish(){const s=S.set,f=S.cur.wf||'all',inF=w=>f==='all'||w.cat===f;
+ const want=S.wish.filter(w=>!w.done),bought=S.wish.filter(w=>w.done),left=s.budget-sum(bought);
+ let h=`<h1>위시리스트</h1><div class="sum"><div><small>사고 싶은 물건</small><b>${won(sum(want))}</b><span>${want.length}개</span></div>
+ ${s.budget?`<div><small>남은 예산</small><b class="${left<0?'neg':''}">${won(left)}</b><span>예산 ${won(s.budget)} 중 ${won(sum(bought))} 씀</span></div>`:''}</div>`;
+ h+=wOpen?wForm():`<button class="btn" data-act="wnew" style="margin:6px 0 4px">물건 추가</button>`;
+ h+=`<div class="row" style="margin-top:12px">${chip('wf','all',f==='all','전체')}${s.wcats.map(c=>chip('wf',c.id,f===c.id,esc(c.t))).join('')}</div>`;
+ let any=false;
+ for(const[p,n]of PRI){const it=want.filter(w=>(w.pri||'next')===p&&inF(w));if(!it.length)continue;any=true;
+  h+=`<div class="grp"><h3>${n}</h3><span class="cnt">${it.length}개 · ${won(sum(it))}</span></div><div class="panel" style="padding:2px 14px;margin-top:6px">${it.map(card).join('')}</div>`}
+ if(!any)h+=`<p class="mute" style="margin-top:16px">${S.wish.length?'이 분류에 사고 싶은 물건이 없어요.':'아직 담은 물건이 없어요. "물건 추가"로 시작하세요.'}</p>`;
+ const bf=bought.filter(inF);
+ if(bf.length)h+=`<details data-key="bought" class="panel" style="padding:4px 14px;margin-top:18px"><summary>구매 완료 (${bf.length}) · ${won(sum(bf))}</summary>${bf.map(card).join('')}</details>`;
+ return h}
+async function saveWish(f){const g=n=>f.elements[n].value.trim(),name=g('name');if(!name)return;
+ const price=parseInt(g('price').replace(/[^0-9]/g,''))||0;let w=wEdit?S.wish.find(x=>x.id===wEdit):null;
+ if(!w){w={id:uid(),done:false,photo:false,at:Date.now()};S.wish.unshift(w)}
+ Object.assign(w,{name,price,cat:g('cat'),pri:g('pri'),link:g('link'),memo:g('memo')});
+ try{if(wPhoto instanceof Blob){await idb.put(w.id,wPhoto);if(PH[w.id])URL.revokeObjectURL(PH[w.id]);PH[w.id]=URL.createObjectURL(wPhoto);w.photo=true}
+  else if(wPhoto==='remove'){await idb.del(w.id);if(PH[w.id])URL.revokeObjectURL(PH[w.id]);delete PH[w.id];w.photo=false}}
+ catch(e){const m=document.getElementById('wmsg');if(m)m.textContent='사진을 저장하지 못했어요. 나머지는 저장됐어요.'}
+ wOpen=false;wEdit=null;wPhoto=null;upd()}
+document.addEventListener('change',async e=>{if(e.target.id!=='wph'||!e.target.files||!e.target.files[0])return;const m=document.getElementById('wmsg');
+ try{if(m)m.textContent='사진 줄이는 중…';wPhoto=await shrink(e.target.files[0]);const p=document.getElementById('wprev');if(p)p.innerHTML=`<img src="${URL.createObjectURL(wPhoto)}" alt="">`;
+  if(m)m.textContent=`사진 준비됨 (${Math.round(wPhoto.size/1024)}KB)`}catch(err){if(m)m.textContent='이 사진은 읽을 수 없어요. 다른 사진을 골라주세요.'}});
+document.addEventListener('click',async e=>{const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,v=el.dataset.v;
+ if(a==='wnew'){wOpen=true;wEdit=null;wPhoto=null;render();scrollTo(0,0)}
+ else if(a==='wedit'){wOpen=true;wEdit=v;wPhoto=null;render();scrollTo(0,0)}
+ else if(a==='wcancel'){wOpen=false;wEdit=null;wPhoto=null;render()}
+ else if(a==='wphrm'){e.preventDefault();wPhoto='remove';const p=document.getElementById('wprev');if(p)p.innerHTML='';el.remove();const m=document.getElementById('wmsg');if(m)m.textContent='저장하면 사진이 빠져요.'}
+ else if(a==='wf'){S.cur.wf=v;upd()}
+ else if(a==='wdone'){const w=S.wish.find(x=>x.id===v);if(w){w.done=!w.done;upd()}}
+ else if(a==='wdel'){const w=S.wish.find(x=>x.id===v);if(!w)return;let ok=true;try{ok=confirm(`"${w.name}"을(를) 삭제할까요?`)}catch(err){}if(!ok)return;
+  S.wish=S.wish.filter(x=>x.id!==v);if(w.photo){try{await idb.del(v)}catch(err){}if(PH[v])URL.revokeObjectURL(PH[v]);delete PH[v]}if(wEdit===v){wOpen=false;wEdit=null}upd()}});
+const V={check:vCheck,interview:vIv,wish:vWish,setup:vSet};
 const tab=()=>{const t=location.hash.slice(1);return V[t]?t:'check'};
-function render(){const t=tab(),y=window.scrollY;document.getElementById('view').innerHTML=V[t]();
- document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.dataset.t===t?'page':'false'));window.scrollTo(0,y)}
-const list=k=>{const[a,b]=k.split(':');if(a==='iv')return S.set.iv[b]||(S.set.iv[b]=[]);if(a==='ck')return S.set.ck.common;const t=S.set.ck.types.find(x=>x.id===b);return t?t.items:[]};
-const upd=()=>{save();render()};
+function render(focus){const t=tab(),y=window.scrollY,open=new Set([...document.querySelectorAll('details[open][data-key]')].map(d=>d.dataset.key));forceOpen.forEach(k=>open.add(k));forceOpen.clear();
+ document.getElementById('view').innerHTML=V[t]();document.querySelectorAll('details[data-key]').forEach(d=>{if(open.has(d.dataset.key))d.open=true});
+ document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.dataset.t===t?'page':'false'));window.scrollTo(0,y);
+ if(focus){const el=document.querySelector(focus);if(el)try{el.focus({preventScroll:true})}catch(e){el.focus()}}
+ if(t==='wish')loadPhotos()}
+const list=k=>{const[a,b]=k.split(':');if(a==='wc')return S.set.wcats;if(a==='iv')return S.set.iv[b]||(S.set.iv[b]=[]);if(a==='ck')return S.set.ck.common;const t=S.set.ck.types.find(x=>x.id===b);return t?t.items:[]};
+const upd=f=>{save();render(f)};const forceOpen=new Set();
 
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,v=el.dataset.v,c=S.cur;
  if(el.tagName==='BUTTON'&&el.form)e.preventDefault();
@@ -166,10 +257,13 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if
  else if(a==='deltype'){if(S.set.ck.types.length<2)return;S.set.ck.types=S.set.ck.types.filter(t=>t.id!==v);if(c.type===v)c.type=S.set.ck.types[0].id}
  else return;upd()});
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('li[data-act]')){e.preventDefault();e.target.click()}});
-document.addEventListener('submit',e=>{e.preventDefault();const f=e.target,inp=f.querySelector('[name=t]'),t=(inp&&inp.value||'').trim();if(!t)return;
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(f.dataset.form==='wish'){saveWish(f);return}
+ if(f.dataset.form==='budget'){S.set.budget=parseInt(String(f.elements.b.value).replace(/[^0-9]/g,''))||0;upd();return}
+ const inp=f.querySelector('[name=t]'),t=(inp&&inp.value||'').trim();if(!t)return;
  if(f.dataset.form==='add')list(f.dataset.k).push({id:uid(),t});else if(f.dataset.form==='extra')S.cur.extra.push({id:uid(),t});
- else if(f.dataset.form==='ivcat'){const id='c'+uid();S.set.ivc.push({id,name:t});S.set.iv[id]=[]}
- else if(f.dataset.form==='type'){const id='t'+uid();S.set.ck.types.push({id,name:t,items:[]})}upd()});
+ else if(f.dataset.form==='ivcat'){const id='c'+uid();S.set.ivc.push({id,name:t});S.set.iv[id]=[];forceOpen.add('iv:'+id)}
+ else if(f.dataset.form==='type'){const id='t'+uid();S.set.ck.types.push({id,name:t,items:[]});forceOpen.add('ty:'+id)}
+ upd(f.dataset.k?`form[data-k="${f.dataset.k}"] [name=t]`:`form[data-form="${f.dataset.form}"] [name=t]`)});
 document.addEventListener('change',e=>{const el=e.target;
  if(el.dataset.edit){const it=list(el.dataset.edit).find(x=>x.id===el.dataset.id);if(it&&el.value.trim())it.t=el.value.trim();save();return}
  if(el.dataset.ivname){const c=S.set.ivc.find(x=>x.id===el.dataset.ivname);if(c&&el.value.trim())c.name=el.value.trim();save();return}
